@@ -23,7 +23,7 @@
 <script type="text/javascript" src="static/app/js/main.routes.js"></script>
 <link href="static/app/css/main.css" rel="stylesheet" />
 </head>
-<body>
+<body ng-cloak class="ng-cloak">
 	<nav class="navbar navbar-inverse navbar-fixed-top">
 		<div class="container">
 			<div class="navbar-header">
@@ -36,7 +36,15 @@
 			</div>
 		</div>
 	</nav>
-
+	
+	<div ng-controller="navigation" class="container">
+		<ul class="nav nav-pills" role="tablist">
+			<li class="active"><a href="#/">home</a></li>
+			<li><a href="#/login">login</a></li>
+			<li ng-show="authenticated"><a href="" ng-click="logout()">logout</a></li>
+		</ul>
+	</div>
+	
 	<div class="jumbotron">
 		<div class="container text-center">
 			<br/>
