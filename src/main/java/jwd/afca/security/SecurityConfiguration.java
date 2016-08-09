@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
@@ -26,7 +27,8 @@ class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	@Autowired
 	public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
 		auth
-			.jdbcAuthentication()
+			.inMemoryAuthentication().withUser("aa").password("aa").roles("ADMIN");
+/*			.jdbcAuthentication()
 				.dataSource(dataSource)
 //				.withDefaultSchema()
 //				.withUser("username").password("password").roles("role");
@@ -34,6 +36,7 @@ class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 						"select username, password, enabled from tbl_users where username=?")
 				.authoritiesByUsernameQuery(
 						"select username, role from tbl_users where username=?");
+*/
 	}
 	
 	@Override
@@ -41,7 +44,10 @@ class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 		http.httpBasic().disable();
 		http
 			.authorizeRequests()
-				.antMatchers("/index", "/home", "/login", "/").permitAll()
+				.antMatchers("/", "/home", "/classifieds", "/categories", "/login").permitAll()
+				.antMatchers(HttpMethod.GET, "/user").permitAll()
+				.antMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
+				.antMatchers(HttpMethod.GET, "/api/classifieds/**").permitAll()
 				.antMatchers("/users").hasRole("ADMIN")
 				.anyRequest().authenticated()
 		.and()
