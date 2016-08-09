@@ -16,7 +16,7 @@ import javax.persistence.Table;
  *
  */
 @Entity
-@Table(name="tblClassifiedAd")
+@Table(name="tbl_classifieds")
 public class ClassifiedAd {
 	
 	@Id

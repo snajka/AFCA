@@ -1,11 +1,13 @@
 package jwd.afca.web.dto;
 
+import jwd.afca.model.User.Role;
+
 public class UserDTO {
 	private Long id;
 	private String email;
 	private String username;
 	private String telephoneNumber;
-	private RoleDTO role;
+	private Role role;
 //	private List<ClassifiedAd> ads;
 	
 	public Long getId() {
@@ -32,12 +34,13 @@ public class UserDTO {
 	public void setTelephoneNumber(String telephoneNumber) {
 		this.telephoneNumber = telephoneNumber;
 	}
-	public RoleDTO getRole() {
+	public Role getRole() {
 		return role;
 	}
-	public void setRole(RoleDTO role) {
+	public void setRole(Role role) {
 		this.role = role;
 	}
+
 //	public List<ClassifiedAd> getAds() {
 //		return ads;
 //	}

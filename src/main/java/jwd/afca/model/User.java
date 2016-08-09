@@ -6,15 +6,15 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @Entity
-@Table(name="tblUser")
+@Table(name="tbl_users")
 public class User {
 	
 	@Id
@@ -34,7 +34,14 @@ public class User {
 	@Column(name="telephone_number")
 	private String telephoneNumber;
 	
-	@ManyToOne(fetch=FetchType.LAZY)
+	@Column(name="enabled",nullable=false)
+	private boolean enabled;
+	
+	public enum Role {
+		USER, ADMIN 
+	}
+	
+	@Enumerated(EnumType.STRING)
 	private Role role;
 	
 	@OneToMany(mappedBy="author",cascade=CascadeType.REMOVE)
@@ -83,22 +90,23 @@ public class User {
 	public void setTelephoneNumber(String telephoneNumber) {
 		this.telephoneNumber = telephoneNumber;
 	}
+	public boolean isEnabled() {
+		return enabled;
+	}
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
+	}
+	public Role getRole() {
+		return role;
+	}
+	public void setRole(Role role) {
+		this.role = role;
+	}
 	public List<ClassifiedAd> getAds() {
 		return ads;
 	}
 	public void setAds(List<ClassifiedAd> ads) {
 		this.ads = ads;
-	}
-	
-	public Role getRole() {
-		return role;
-	}
-	
-	public void setRole(Role role) {
-		this.role = role;
-		if(role!=null && !role.getUsers().contains(this)){
-			role.getUsers().add(this);
-		}
 	}
 	
 }
