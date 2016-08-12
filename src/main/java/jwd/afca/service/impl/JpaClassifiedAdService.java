@@ -1,7 +1,9 @@
 package jwd.afca.service.impl;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.transaction.Transactional;
 
@@ -15,6 +17,9 @@ import org.springframework.stereotype.Service;
 import jwd.afca.model.ClassifiedAd;
 import jwd.afca.repository.ClassifiedAdRepository;
 import jwd.afca.service.ClassifiedAdService;
+import jwd.afca.support.ClassifiedAdDTOToClassifiedAd;
+import jwd.afca.support.ClassifiedAdToClassifiedAdDTO;
+import jwd.afca.web.dto.ClassifiedAdDTO;
 
 @Service
 @Transactional
@@ -24,35 +29,47 @@ public class JpaClassifiedAdService
 	@Autowired
 	private ClassifiedAdRepository classifiedsRepository;
 
+	@Autowired
+	private ClassifiedAdToClassifiedAdDTO toDTO;
+
+	@Autowired
+	private ClassifiedAdDTOToClassifiedAd toAd;
+	
 	@Override
-	public ClassifiedAd findOne(Long id) {
-		return classifiedsRepository.findOne(id);
+	public ClassifiedAdDTO findOne(Long id) {
+		return toDTO.convert(classifiedsRepository.findOne(id));
 	}
 
 	@Override
-	public Page<ClassifiedAd> findAll(int page, int itemsPerPage, Sort.Direction direction, String property) {
-		return classifiedsRepository.findAll(new PageRequest(page, itemsPerPage, direction, property));
+	public Map<String, Object> findAll(int page, int itemsPerPage, Sort.Direction direction, String property) {
+		Page<ClassifiedAd> adsPage = classifiedsRepository.findAll(new PageRequest(page, itemsPerPage, direction, property));
+		Map<String, Object> map = new HashMap<>();
+		map.put("totalPages", adsPage.getTotalPages());
+		map.put("totalElements", adsPage.getTotalElements());
+		map.put("dtos", toDTO.convert(adsPage));
+		
+		return map;
 	}
 
 	@Override
-	public ClassifiedAd save(ClassifiedAd activity) {
-		return classifiedsRepository.save(activity);
+	public ClassifiedAdDTO save(ClassifiedAdDTO activity) {
+		return toDTO.convert(classifiedsRepository.save(toAd.convert(activity)));
 	}
 
 	@Override
-	public List<ClassifiedAd> save(List<ClassifiedAd> activities) {
-		return classifiedsRepository.save(activities);
+	public List<ClassifiedAdDTO> save(List<ClassifiedAdDTO> activities) {
+		return toDTO.convert(classifiedsRepository.save(toAd.convert(activities)));
 	}
 
 	@Override
-	public ClassifiedAd delete(Long id) {
-		ClassifiedAd activity = classifiedsRepository.findOne(id);
-		if(activity == null){
+	public ClassifiedAdDTO delete(Long id) {
+		ClassifiedAd ad = classifiedsRepository.findOne(id);
+		if(ad == null){
 			throw new IllegalArgumentException("Tried to delete"
 					+ "non-existant activity");
 		}
-		classifiedsRepository.delete(activity);
-		return activity;
+		classifiedsRepository.delete(ad);
+		return toDTO.convert(ad);
 	}
 
 	@Override
@@ -63,19 +80,25 @@ public class JpaClassifiedAdService
 	}
 
 	@Override
-	public Page<ClassifiedAd> findByTitleContains(int page, int itemsPerPage, String search) {
-		return classifiedsRepository.findByTitleContains(new PageRequest(page, itemsPerPage), search);
+	public Map<String, Object> findByTitleContains(int page, int itemsPerPage, String search) {
+		Page<ClassifiedAd> adsPage = classifiedsRepository.findByTitleContains(new PageRequest(page, itemsPerPage), search);
+		Map<String, Object> map = new HashMap<>();
+		map.put("totalPages", adsPage.getTotalPages());
+		map.put("totalElements", adsPage.getTotalElements());
+		map.put("dtos", toDTO.convert(adsPage));
+		
+		return map;
 	}
 
 	@Override
-	public Page<ClassifiedAd> findByExpirationDateAfter(int page, int itemsPerPage, Direction direction, String property) {
-		return classifiedsRepository.findByExpirationDateAfter(new PageRequest(page, itemsPerPage, direction, property), new Date());
+	public Map<String, Object> findByExpirationDateAfter(int page, int itemsPerPage, Direction direction, String property) {
+		Page<ClassifiedAd> adsPage = classifiedsRepository.findByExpirationDateAfter(new PageRequest(page, itemsPerPage, direction, property), new Date());
+		Map<String, Object> map = new HashMap<>();
+		map.put("totalPages", adsPage.getTotalPages());
+		map.put("totalElements", adsPage.getTotalElements());
+		map.put("dtos", toDTO.convert(adsPage));
+		
+		return map;
 	}
-	
-	//@PostConstruct
-//	public void БилоШта(){
-//		save(new Activity("Swimming"));
-//		save(new Activity("Running"));
-//	}
 
 }

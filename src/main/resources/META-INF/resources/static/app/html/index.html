@@ -24,25 +24,22 @@
 </head>
 <body>
 	<nav class="navbar navbar-inverse navbar-fixed-top">
-		<div class="container">
+		<div class="container" ng-controller="AuthenticationController">
 			<div class="navbar-header">
 				<a class="navbar-brand" href="/#/">Home</a>
 				<a class="navbar-brand" href="/#/classifieds">Classifieds</a>
 				<a class="navbar-brand" href="/#/users">Users</a>
 				<a class="navbar-brand" href="/#/categories">Categories</a>
-				<a class="navbar-brand" href="/#/login">Login</a>
 				<a class="navbar-brand" href="/#/register">Register</a>
+				<span class="nav navbar-nav navbar-right">
+					<a class="navbar-brand" href="/#/login">Log In</a>
+					<a class="navbar-brand" href="/#/" ng-click="logout()">Log Out</a>
+				</span>
 			</div>
 		</div>
 	</nav>
 	
-	<div ng-controller="AuthenticationController" class="container">
-		<ul class="nav nav-pills" role="tablist">
-			<li class="active"><a href="/#/">home</a></li>
-			<li><a href="/#/login">login</a></li>
-			<li ng-show="authenticated"><a href="" ng-click="logout()">logout</a></li>
-		</ul>
-	</div>
+
 	
 	<div class="jumbotron">
 		<div class="container text-center">

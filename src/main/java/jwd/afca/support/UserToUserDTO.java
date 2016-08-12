@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
 import jwd.afca.model.User;
@@ -12,9 +13,6 @@ import jwd.afca.web.dto.UserDTO;
 @Component
 public class UserToUserDTO implements Converter<User, UserDTO> {
 
-//	@Autowired
-//	private RoleToRoleDTO toRoleDTO;
-	
 	@Override
 	public UserDTO convert(User user) {
 		UserDTO dto = new UserDTO();
@@ -23,7 +21,7 @@ public class UserToUserDTO implements Converter<User, UserDTO> {
 		dto.setUsername(user.getUsername());
 		dto.setEmail(user.getEmail());
 		dto.setTelephoneNumber(user.getTelephoneNumber());
-//		dto.setRole(toRoleDTO.convert(user.getRole()));
+		dto.setRole(user.getRole());
 //		dto.setAds(user.getAds());
 		
 		return dto;
@@ -37,6 +35,13 @@ public class UserToUserDTO implements Converter<User, UserDTO> {
 		}
 		
 		return ret;
+	}
+	
+	public List<UserDTO> convert(Page<User> usersPage){
+		List<User> users = usersPage.getContent();
+		List<UserDTO> dtos = convert(users);
+		
+		return dtos;
 	}
 	
 }

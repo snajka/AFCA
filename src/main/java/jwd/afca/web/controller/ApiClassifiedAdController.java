@@ -1,13 +1,15 @@
 package jwd.afca.web.controller;
 
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,11 +17,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import jwd.afca.model.ClassifiedAd;
 import jwd.afca.service.ClassifiedAdService;
-import jwd.afca.support.ClassifiedAdDTOToClassifiedAd;
-import jwd.afca.support.ClassifiedAdToClassifiedAdDTO;
+import jwd.afca.service.UserService;
 import jwd.afca.web.dto.ClassifiedAdDTO;
+import jwd.afca.web.dto.UserDTO;
 
 @RestController
 @RequestMapping(value = "/api/classifieds")
@@ -27,35 +28,33 @@ public class ApiClassifiedAdController {
 
 	@Autowired
 	private ClassifiedAdService classifiedAdService;
-
+	
 	@Autowired
-	private ClassifiedAdToClassifiedAdDTO toDTO;
+	private UserService userService;
 
-	@Autowired
-	private ClassifiedAdDTOToClassifiedAd toAd;
-
+	@SuppressWarnings("unchecked")
 	@RequestMapping(method = RequestMethod.GET)
 	ResponseEntity<List<ClassifiedAdDTO>> getAds(
 			@RequestParam(value = "search", required = false) String search,
 			@RequestParam(value = "page", required = false, defaultValue="0") int page,
 			@RequestParam(value = "itemsPerPage", required = false, defaultValue="5") int itemsPerPage,
-			@RequestParam(value = "direction", required = false, defaultValue="DESC") String direction,
+			@RequestParam(value = "direction", required = false, defaultValue="ASC") String direction,
 			@RequestParam(value = "property", required = false, defaultValue="id") String property) {
 
-		List<ClassifiedAd> ads;
-		Page<ClassifiedAd> adsPage;
+		List<ClassifiedAdDTO> ads;
 		int totalPages = 0;
 		long totalElements = 0;
+		HashMap<String, Object> map;
 
 		if (search != null) {
-			adsPage = classifiedAdService.findByTitleContains(page, itemsPerPage, search);
+			map = (HashMap<String, Object>) classifiedAdService.findByTitleContains(page, itemsPerPage, search);
 		} else {
-			adsPage = classifiedAdService.findByExpirationDateAfter(page, itemsPerPage, Sort.Direction.fromString(direction), property);
+			map = (HashMap<String, Object>) classifiedAdService.findByExpirationDateAfter(page, itemsPerPage, Sort.Direction.fromString(direction), property);
 		}
 		
-		ads = adsPage.getContent();
-		totalPages = adsPage.getTotalPages();
-		totalElements = adsPage.getTotalElements();
+		ads = (List<ClassifiedAdDTO>) map.get("dtos");
+		totalPages = (int) map.get("totalPages");
+		totalElements = (long) map.get("totalElements");
 		
 		if (page > totalPages) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -65,26 +64,29 @@ public class ApiClassifiedAdController {
 		httpHeaders.add("total-pages", Integer.toString(totalPages));
 		httpHeaders.add("total-elements", Long.toString(totalElements));
 
-		return new ResponseEntity<>(toDTO.convert(ads), httpHeaders, HttpStatus.OK);
+		return new ResponseEntity<>(ads, httpHeaders, HttpStatus.OK);
 	}
 
 	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
 	ResponseEntity<ClassifiedAdDTO> getAd(@PathVariable Long id) {
-		ClassifiedAd ad = classifiedAdService.findOne(id);
+		ClassifiedAdDTO ad = classifiedAdService.findOne(id);
 		if (ad == null) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 
-		return new ResponseEntity<>(toDTO.convert(ad), HttpStatus.OK);
+		return new ResponseEntity<>(ad, HttpStatus.OK);
 	}
 
 	@RequestMapping(method = RequestMethod.POST, consumes = "application/json")
 	public ResponseEntity<ClassifiedAdDTO> add(@RequestBody ClassifiedAdDTO newAd) {
+		
+		String username = SecurityContextHolder.getContext().getAuthentication().getName();
+    	UserDTO currentUser = userService.findByUsername(username);	  
+    	newAd.setAuthor(currentUser);
+    	newAd.setCreationDate(new Date());
+		ClassifiedAdDTO savedAd = classifiedAdService.save(newAd);
 
-		ClassifiedAd savedAd = classifiedAdService.save(toAd
-				.convert(newAd));
-
-		return new ResponseEntity<>(toDTO.convert(savedAd), HttpStatus.CREATED);
+		return new ResponseEntity<>(savedAd, HttpStatus.CREATED);
 	}
 
 	@RequestMapping(method = RequestMethod.PUT, value = "/{id}", consumes = "application/json")
@@ -95,16 +97,16 @@ public class ApiClassifiedAdController {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 
-		ClassifiedAd persisted = classifiedAdService.save(toAd.convert(ad));
+		ClassifiedAdDTO persisted = classifiedAdService.save(ad);
 
-		return new ResponseEntity<>(toDTO.convert(persisted), HttpStatus.OK);
+		return new ResponseEntity<>(persisted, HttpStatus.OK);
 	}
 	
 	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
 	ResponseEntity<ClassifiedAdDTO> delete(@PathVariable Long id) {
-		ClassifiedAd deleted = classifiedAdService.delete(id);
+		ClassifiedAdDTO deleted = classifiedAdService.delete(id);
 
-		return new ResponseEntity<>(toDTO.convert(deleted), HttpStatus.OK);
+		return new ResponseEntity<>(deleted, HttpStatus.OK);
 	}
 
 }

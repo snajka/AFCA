@@ -8,20 +8,20 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
 import jwd.afca.model.User;
-import jwd.afca.service.UserService;
+import jwd.afca.repository.UserRepository;
 import jwd.afca.web.dto.UserRegistrationDTO;
 
 @Component
 public class UserRegistrationDTOToUser implements Converter<UserRegistrationDTO, User>  {
 
 	@Autowired
-	private UserService userService;
+	private UserRepository userRepository;
 	
 	@Override
 	public User convert(UserRegistrationDTO dto) {
 		User user = new User();
 		if(dto.getId()!=null){
-			user = userService.findOne(dto.getId());
+			user = userRepository.findOne(dto.getId());
 			
 			if(user == null){
 				throw new IllegalStateException("Tried to "

@@ -8,7 +8,7 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
 import jwd.afca.model.ClassifiedAd;
-import jwd.afca.service.ClassifiedAdService;
+import jwd.afca.repository.ClassifiedAdRepository;
 import jwd.afca.web.dto.ClassifiedAdDTO;
 
 @Component
@@ -16,7 +16,7 @@ public class ClassifiedAdDTOToClassifiedAd
 	implements Converter<ClassifiedAdDTO, ClassifiedAd> {
 	
 	@Autowired
-	ClassifiedAdService classifiedAdService;
+	ClassifiedAdRepository classifiedAdRepository;
 
 	@Autowired
 	private CategoryDTOToCategory toCategory;
@@ -29,7 +29,7 @@ public class ClassifiedAdDTOToClassifiedAd
 		ClassifiedAd ad = new ClassifiedAd();
 		
 		if(dto.getId()!=null){
-			ad = classifiedAdService.findOne(dto.getId());
+			ad = classifiedAdRepository.findOne(dto.getId());
 			
 			if(ad == null){
 				throw new IllegalStateException("Tried to "

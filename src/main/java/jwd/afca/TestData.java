@@ -10,47 +10,46 @@ import org.springframework.stereotype.Component;
 import jwd.afca.model.Category;
 import jwd.afca.model.ClassifiedAd;
 import jwd.afca.model.User;
-import jwd.afca.service.CategoryService;
-import jwd.afca.service.ClassifiedAdService;
-import jwd.afca.service.UserService;
+import jwd.afca.repository.CategoryRepository;
+import jwd.afca.repository.ClassifiedAdRepository;
+import jwd.afca.repository.UserRepository;
 @Component
 public class TestData {
 
 	@Autowired
-	private UserService userService;
+	private UserRepository userRepository;
 	
 	@Autowired
-	private CategoryService categoryService;
-	
-//	@Autowired
-//	private RoleService roleService;
+	private CategoryRepository categoryRepository;
 	
 	@Autowired
-	private ClassifiedAdService classifiedAdService;
+	private ClassifiedAdRepository classifiedAdRepository;
 		
 	@PostConstruct
 	public void init(){
-//		Role role1 = new Role();
-//		role1.setName("subscriber");
-//		roleService.save(role1);
-//		Role role2 = new Role();
-//		role2.setName("administrator");
-//		roleService.save(role2);
+
 		for (int i = 1; i <= 14; i++) {
 			Category category = new Category();
             User user = new User();
             ClassifiedAd ad = new ClassifiedAd();
             
-            user.setUsername("user " + i);
+            user.setUsername("user" + i);
             user.setTelephoneNumber("1111" + i);
             user.setEmail("email" + i + "@example.com");
             user.setPassword("123");
-            user.setRole(User.Role.USER);
-            userService.save(user);
+            if (i < 4) {
+            	user.setRole(User.Role.ADMIN);
+            	user.setEnabled(true);
+            } else {
+            	user.setRole(User.Role.USER);
+            	if (i < 6)
+            		user.setEnabled(true);
+            }
+            userRepository.save(user);
             
             category.setName("kategorija" + i);
             category.setDescription("decepticon" + i);
-            categoryService.save(category);
+            categoryRepository.save(category);
             
             ad.setTitle("naslov" + i);
             ad.setText("tekst" + i);
@@ -58,7 +57,7 @@ public class TestData {
             ad.setExpirationDate(new Date());
             ad.setAuthor(user);
             ad.setCategory(category);
-            classifiedAdService.save(ad);
+            classifiedAdRepository.save(ad);
 		}
 	}
 }

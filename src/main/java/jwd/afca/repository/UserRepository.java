@@ -13,4 +13,6 @@ public interface UserRepository
 
 	Page<User> findByUsernameContains(Pageable page, String search);
 
+	User findByUsernameAndEnabledTrue(String username);	
+
 }

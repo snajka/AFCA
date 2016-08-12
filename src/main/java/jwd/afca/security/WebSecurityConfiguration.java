@@ -10,59 +10,56 @@ import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.servlet.configuration.EnableWebMvcSecurity;
 import org.springframework.security.web.csrf.CsrfFilter;
 import org.springframework.security.web.csrf.CsrfTokenRepository;
 import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
 
 @Configuration
-@EnableWebSecurity
+@EnableWebMvcSecurity
 @Order(SecurityProperties.ACCESS_OVERRIDE_ORDER)
-class SecurityConfiguration extends WebSecurityConfigurerAdapter {
+class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
+	
 	@Autowired
 	private DataSource dataSource;
 
 	@Autowired
-	public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+	public void registerAuthentication(AuthenticationManagerBuilder auth) throws Exception {
 		auth
-			.inMemoryAuthentication().withUser("aa").password("aa").roles("ADMIN");
-/*			.jdbcAuthentication()
+			.jdbcAuthentication()
 				.dataSource(dataSource)
-//				.withDefaultSchema()
-//				.withUser("username").password("password").roles("role");
 				.usersByUsernameQuery(
 						"select username, password, enabled from tbl_users where username=?")
 				.authoritiesByUsernameQuery(
 						"select username, role from tbl_users where username=?");
-*/
+
 	}
 	
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-		http.httpBasic().disable();
 		http
 			.authorizeRequests()
-				.antMatchers("/", "/home", "/classifieds", "/categories", "/login").permitAll()
-				.antMatchers(HttpMethod.GET, "/user").permitAll()
+				.antMatchers("/", "/home", "/classifieds", "/categories", "/register", "/static/**").permitAll()
+				.antMatchers(HttpMethod.POST, "/login").permitAll()
 				.antMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
 				.antMatchers(HttpMethod.GET, "/api/classifieds/**").permitAll()
-				.antMatchers("/users").hasRole("ADMIN")
+				.antMatchers(HttpMethod.PUT, "/api/classifieds").hasRole("USER")
+				.antMatchers(HttpMethod.POST, "/api/classifieds").hasRole("USER")
+				.antMatchers(HttpMethod.GET, "/users").hasRole("ADMIN")
+				.antMatchers(HttpMethod.PUT).hasRole("ADMIN")
+				.antMatchers(HttpMethod.POST).hasRole("ADMIN")
+				.antMatchers(HttpMethod.DELETE).hasRole("ADMIN")
 				.anyRequest().authenticated()
+		.and()
+			.formLogin().loginPage("/login").permitAll()
 		.and()
 			.addFilterAfter(new CsrfHeaderFilter(), CsrfFilter.class)
 				.csrf().csrfTokenRepository(csrfTokenRepository())
 		.and()
-			.logout();
+			.logout().invalidateHttpSession(true).permitAll();
+				
 	}
-	
-	@Override
-    public void configure(WebSecurity web) throws Exception {
-      web
-        .ignoring()
-           .antMatchers("/static/**"); 
-    }
 	
 	private CsrfTokenRepository csrfTokenRepository() {
 		  HttpSessionCsrfTokenRepository repository = new HttpSessionCsrfTokenRepository();

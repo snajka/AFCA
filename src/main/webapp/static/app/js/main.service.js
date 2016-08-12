@@ -2,8 +2,6 @@ var afcaApp = angular.module('afcaApp.Service', []);
 
 afcaApp.service('service', function($http) {
 	
-//	this.url = 'api/categories';
-	
 	this.getOne = function(url, id) {
 		return $http.get(url + '/' + id);
 	}

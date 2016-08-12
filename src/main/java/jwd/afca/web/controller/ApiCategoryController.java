@@ -1,9 +1,9 @@
 package jwd.afca.web.controller;
 
+import java.util.HashMap;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -16,53 +16,45 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import jwd.afca.model.Category;
 import jwd.afca.service.CategoryService;
-import jwd.afca.support.CategoryDTOToCategory;
-import jwd.afca.support.CategoryToCategoryDTO;
 import jwd.afca.web.dto.CategoryDTO;
 
 @RestController
 @RequestMapping("/api/categories")
 public class ApiCategoryController {
-	
+
 	@Autowired
 	private CategoryService categoryService;
-
-	@Autowired
-	private CategoryDTOToCategory toCategory;
-
-	@Autowired
-	private CategoryToCategoryDTO toDTO;
-
+	
+	@SuppressWarnings("unchecked")
 	@RequestMapping(method = RequestMethod.GET)
 	public ResponseEntity<List<CategoryDTO>> get(
 			@RequestParam(value = "search", required = false) String search,
 			@RequestParam(value = "page", required = false, defaultValue="0") int page,
 			@RequestParam(value = "itemsPerPage", required = false, defaultValue="5") int itemsPerPage,
-			@RequestParam(value = "direction", required = false, defaultValue="DESC") String direction,
+			@RequestParam(value = "direction", required = false, defaultValue="ASC") String direction,
 			@RequestParam(value = "property", required = false, defaultValue="id") String property) {
 
-		List<Category> categories;
-		Page<Category> categoriesPage;
+		List<CategoryDTO> categories;
 		int totalPages = 0;
 		long totalElements = 0;
+		HashMap<String, Object> map;
 		
 		if (page == -1) {
 			categories = categoryService.findAll();
 			
-			return new ResponseEntity<>(toDTO.convert(categories), HttpStatus.OK);
+			return new ResponseEntity<>(categories, HttpStatus.OK);
 		}
 		
 		if (search != null) {
-			categoriesPage = categoryService.findByNameContains(page, itemsPerPage, search);
+			map = (HashMap<String, Object>) categoryService.findByNameContains(page, itemsPerPage, search);
 		} else {
-			categoriesPage = categoryService.findAll(page, itemsPerPage, Sort.Direction.fromString(direction), property);
+			map = (HashMap<String, Object>) categoryService.findAll(page, itemsPerPage, Sort.Direction.fromString(direction), property);
 		}
 		
-		categories = categoriesPage.getContent();
-		totalPages = categoriesPage.getTotalPages();
-		totalElements = categoriesPage.getTotalElements();
+		categories = (List<CategoryDTO>) map.get("dtos");
+		totalPages = (int) map.get("totalPages");
+		totalElements = (long) map.get("totalElements");
 		
 		if (page > totalPages) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -72,28 +64,28 @@ public class ApiCategoryController {
 		httpHeaders.add("total-pages", Integer.toString(totalPages));
 		httpHeaders.add("total-elements", Long.toString(totalElements));
 
-		return new ResponseEntity<>(toDTO.convert(categories), httpHeaders, HttpStatus.OK);
+		return new ResponseEntity<>(categories, httpHeaders, HttpStatus.OK);
 	}
 
 	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
 	public ResponseEntity<CategoryDTO> get(@PathVariable Long id) {
 
-		Category category = categoryService.findOne(id);
+		CategoryDTO category = categoryService.findOne(id);
 
 		if (category == null) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 
-		return new ResponseEntity<>(toDTO.convert(category), HttpStatus.OK);
+		return new ResponseEntity<>(category, HttpStatus.OK);
 	}
 	
 	@RequestMapping(method = RequestMethod.POST, consumes = "application/json")
 	public ResponseEntity<CategoryDTO> add(
 			@RequestBody @Validated CategoryDTO newCategory) {
 
-		Category persisted = categoryService.save(toCategory.convert(newCategory));
+		CategoryDTO persisted = categoryService.save(newCategory);
 
-		return new ResponseEntity<>(toDTO.convert(persisted), HttpStatus.CREATED);
+		return new ResponseEntity<>(persisted, HttpStatus.CREATED);
 	}
 
 	@RequestMapping(value = "/{id}", method = RequestMethod.PUT, consumes = "application/json")
@@ -104,15 +96,14 @@ public class ApiCategoryController {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 
-		Category oldCategory = categoryService.findOne(id);
+		CategoryDTO oldCategory = categoryService.findOne(id);
 		if (oldCategory == null) {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 
-		Category persisted = categoryService.save(toCategory
-				.convert(editedCategory));
+		CategoryDTO persisted = categoryService.save(editedCategory);
 
-		return new ResponseEntity<>(toDTO.convert(persisted), HttpStatus.OK);
+		return new ResponseEntity<>(persisted, HttpStatus.OK);
 	}
 
 	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE)

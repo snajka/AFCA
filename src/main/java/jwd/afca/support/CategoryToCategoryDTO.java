@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
 import jwd.afca.model.Category;
@@ -33,4 +34,12 @@ public class CategoryToCategoryDTO implements Converter<Category, CategoryDTO> {
 		
 		return ret;
 	}
+	
+	public List<CategoryDTO> convert(Page<Category> categoriesPage){
+		List<Category> categories = categoriesPage.getContent();
+		List<CategoryDTO> dtos = convert(categories);
+		
+		return dtos;
+	}
+	
 }

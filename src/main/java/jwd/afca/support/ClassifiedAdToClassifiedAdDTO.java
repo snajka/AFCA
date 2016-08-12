@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
 import jwd.afca.model.ClassifiedAd;
@@ -49,4 +50,11 @@ public class ClassifiedAdToClassifiedAdDTO
 		return ret;
 	}
 
+	public List<ClassifiedAdDTO> convert(Page<ClassifiedAd> adsPage){
+		List<ClassifiedAd> ads = adsPage.getContent();
+		List<ClassifiedAdDTO> dtos = convert(ads);
+		
+		return dtos;
+	}
+	
 }

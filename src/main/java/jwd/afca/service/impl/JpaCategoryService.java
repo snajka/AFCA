@@ -1,6 +1,8 @@
 package jwd.afca.service.impl;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -11,6 +13,9 @@ import org.springframework.stereotype.Service;
 import jwd.afca.model.Category;
 import jwd.afca.repository.CategoryRepository;
 import jwd.afca.service.CategoryService;
+import jwd.afca.support.CategoryDTOToCategory;
+import jwd.afca.support.CategoryToCategoryDTO;
+import jwd.afca.web.dto.CategoryDTO;
 
 @Service
 public class JpaCategoryService 
@@ -19,22 +24,33 @@ public class JpaCategoryService
 	@Autowired
 	private CategoryRepository categoryRepository;
 
+	@Autowired
+	private CategoryDTOToCategory toCategory;
+
+	@Autowired
+	private CategoryToCategoryDTO toDTO;
+	
 	@Override
-	public Category findOne(Long id) {
+	public CategoryDTO findOne(Long id) {
 		
-		return categoryRepository.findOne(id);
+		return toDTO.convert(categoryRepository.findOne(id));
 	}
 
 	@Override
-	public Page<Category> findAll(int page, int itemsPerPage, Sort.Direction direction, String property) {
+	public Map<String, Object> findAll(int page, int itemsPerPage, Sort.Direction direction, String property) {
+		Page<Category> categoriesPage = categoryRepository.findAll(new PageRequest(page, itemsPerPage, direction, property));
+		Map<String, Object> map = new HashMap<>();
+		map.put("totalPages", categoriesPage.getTotalPages());
+		map.put("totalElements", categoriesPage.getTotalElements());
+		map.put("dtos", toDTO.convert(categoriesPage));
 		
-		return categoryRepository.findAll(new PageRequest(page, itemsPerPage, direction, property));
+		return map;
 	}
 
 	@Override
-	public Category save(Category category) {
+	public CategoryDTO save(CategoryDTO category) {
 		
-		return categoryRepository.save(category);
+		return toDTO.convert(categoryRepository.save(toCategory.convert(category)));
 	}
 
 
@@ -45,13 +61,19 @@ public class JpaCategoryService
 	}
 
 	@Override
-	public Page<Category> findByNameContains(int page, int itemsPerPage, String search) {
-		return categoryRepository.findByNameContains(new PageRequest(page, itemsPerPage), search);
+	public Map<String, Object> findByNameContains(int page, int itemsPerPage, String search) {
+		Page<Category> categoriesPage = categoryRepository.findByNameContains(new PageRequest(page, itemsPerPage), search);
+		Map<String, Object> map = new HashMap<>();
+		map.put("totalPages", categoriesPage.getTotalPages());
+		map.put("totalElements", categoriesPage.getTotalElements());
+		map.put("dtos", toDTO.convert(categoriesPage));
+			
+		return map;
 	}
 
 	@Override
-	public List<Category> findAll() {
-		return categoryRepository.findAll();
+	public List<CategoryDTO> findAll() {
+		return toDTO.convert(categoryRepository.findAll());
 	}
 
 //	@Override

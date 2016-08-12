@@ -26,6 +26,10 @@ afcaApp.config(['$routeProvider', '$httpProvider', function($routeProvider, $htt
             templateUrl : '/static/app/html/partial/addEditClassifiedAd.html',
             controller : 'ClassifiedsController'
         })
+        .when('/myClassifieds', {
+            templateUrl : '/static/app/html/partial/myClassifieds.html',
+            controller : 'ClassifiedsController'
+        })         
         .when('/users', {
             templateUrl : '/static/app/html/partial/users.html',
             controller: 'UsersController'

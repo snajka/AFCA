@@ -15,9 +15,6 @@ import jwd.afca.web.dto.UserDTO;
 public class UserDTOToUser 
 	implements Converter<UserDTO, User> {
 
-//	@Autowired
-//	private RoleDTOToRole toRole;	
-	
 	@Autowired
 	private UserRepository userRepository;
 
@@ -35,7 +32,7 @@ public class UserDTOToUser
 		user.setEmail(dto.getEmail());
 		user.setUsername(dto.getUsername());
 		user.setTelephoneNumber(dto.getTelephoneNumber());
-//		user.setRole(toRole.convert(dto.getRole()));
+		user.setRole(dto.getRole());
 //		user.setAds(dto.getAds());
 		
 		return user;

@@ -8,21 +8,21 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
 import jwd.afca.model.Category;
-import jwd.afca.service.CategoryService;
+import jwd.afca.repository.CategoryRepository;
 import jwd.afca.web.dto.CategoryDTO;
 @Component
 public class CategoryDTOToCategory 
 	implements Converter<CategoryDTO, Category> {
 	
 	@Autowired
-	CategoryService categoryService;
+	CategoryRepository categoryRepository;
 
 	@Override
 	public Category convert(CategoryDTO dto) {
 		Category category = new Category();
 		
 		if(dto.getId()!=null){
-			category = categoryService.findOne(dto.getId());
+			category = categoryRepository.findOne(dto.getId());
 			
 			if(category == null){
 				throw new IllegalStateException("Tried to "

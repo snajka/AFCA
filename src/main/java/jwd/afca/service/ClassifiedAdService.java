@@ -1,12 +1,12 @@
 package jwd.afca.service;
 
 import java.util.List;
+import java.util.Map;
 
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 
-import jwd.afca.model.ClassifiedAd;
+import jwd.afca.web.dto.ClassifiedAdDTO;
 
 public interface ClassifiedAdService {
 	/**
@@ -15,13 +15,13 @@ public interface ClassifiedAdService {
 	 * @return Activity, if activity with such ID
 	 * exists, {@code null} if activity is not found.
 	 */
-	ClassifiedAd findOne(Long id);
+	ClassifiedAdDTO findOne(Long id);
 	
 	/**
 	 *  
 	 * @return List of all existing activities.
 	 */
-	Page<ClassifiedAd> findAll(int page, int itemsPerPage, Sort.Direction direction, String property);
+	Map<String, Object> findAll(int page, int itemsPerPage, Sort.Direction direction, String property);
 	
 	/**
 	 * Persists an activity. If activity's id is null,
@@ -29,14 +29,14 @@ public interface ClassifiedAdService {
 	 * @param activity
 	 * @return Activity state after persisting. 
 	 */
-	ClassifiedAd save(ClassifiedAd ad);
+	ClassifiedAdDTO save(ClassifiedAdDTO ad);
 	
 	/**
 	 * Persist a list of activities
 	 * @param activities
 	 * @return
 	 */
-	List<ClassifiedAd> save(List<ClassifiedAd> ads);
+	List<ClassifiedAdDTO> save(List<ClassifiedAdDTO> ads);
 	
 	/**
 	 * Deletes an activity having specified ID.
@@ -45,7 +45,7 @@ public interface ClassifiedAdService {
 	 * If the activity was not found, an {@link IllegalArgumentException}
 	 * is thrown.
 	 */
-	ClassifiedAd delete(Long id);
+	ClassifiedAdDTO delete(Long id);
 	
 	/**
 	 * Remove a list of activities.
@@ -60,12 +60,8 @@ public interface ClassifiedAdService {
 	 * @return List of Activities who's name equals the string
 	 * given in the {@code name} parameter.
 	 */
-	Page<ClassifiedAd> findByTitleContains(int page, int itemsPerPage, String title);
+	Map<String, Object> findByTitleContains(int page, int itemsPerPage, String title);
 
-	Page<ClassifiedAd> findByExpirationDateAfter(int page, int itemsPerPage, Direction direction, String property);
-	
-	
-	
-	
-	
+	Map<String, Object> findByExpirationDateAfter(int page, int itemsPerPage, Direction direction, String property);
+		
 }
